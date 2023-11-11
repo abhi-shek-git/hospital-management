@@ -1,6 +1,7 @@
 package serverConnection
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -14,5 +15,8 @@ func StartServer() {
 	// make handle func after writing the func
 	router.HandleFunc("/api/v1/doctor", doctor.CreateDoctor).Methods(http.MethodPost)
 	// making machine up and running on 8080
-	http.ListenAndServe(utils.PortNo, router)
+	err := http.ListenAndServe(utils.PortNo, router)
+	if err != nil {
+		log.Fatal("error occured during listen and serve process", err)
+	}
 }

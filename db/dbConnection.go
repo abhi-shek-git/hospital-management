@@ -12,8 +12,8 @@ import (
 func ConnectDB() *mongo.Database {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
-		log.Fatal("error occured during connecting to db")
+		log.Fatal("error occured during connecting to db", err)
 	}
-	database := client.Database(utils.HMDB)
-	return database
+
+	return client.Database(utils.HMDB)
 }
