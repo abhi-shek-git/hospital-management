@@ -17,7 +17,7 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 	var doc models.Doctor
 	err := json.NewDecoder(r.Body).Decode(&doc)
 	if err != nil {
-		log.Println("error occured during decoding input body", err)
+		log.Printf("error occured during decoding input body, error = %s /n", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("invalid input"))
 		return
@@ -39,13 +39,13 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 	dbFindResult := collection.FindOne(context.TODO(), query)
 	err = dbFindResult.Err()
 	if err == nil {
-		log.Println("data already exists")
+		log.Printf("data already exists /n")
 		w.WriteHeader(http.StatusConflict)
 		w.Write([]byte("data already exists"))
 		return
 	}
 	if err != nil && err != mongo.ErrNoDocuments {
-		log.Println("error occured during finding data from db", err)
+		log.Printf("error occured during finding data from db, error = %s /n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("internal error"))
 		return
@@ -53,7 +53,7 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 
 	_, err = collection.InsertOne(context.TODO(), doc)
 	if err != nil {
-		log.Printf("error occured during inserting the data into db %s", err)
+		log.Printf("error occured during inserting the data into db %s /n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
