@@ -83,7 +83,7 @@ func DoctorDataAdded(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ResponseByte, err := json.Marshal(doc)
-	if err != bson.ErrDecodeToNil {
+	if err != nil {
 		log.Printf("error occured during marshalling the data for response. Error =  %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return

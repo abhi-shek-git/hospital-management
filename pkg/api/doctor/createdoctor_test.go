@@ -2,7 +2,6 @@ package doctor
 
 import (
 	"bytes"
-	"context"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -10,13 +9,12 @@ import (
 
 	"github.com/hospital-management/db"
 	"github.com/hospital-management/pkg/utils"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestCreateDoctor(t *testing.T) {
 	body := `{
-		"name" : "ABC",
-		"mobileno":123
+		"name" : "ABCD",
+		"mobileno":123456
 		}
 	`
 	reqBody := bytes.NewBuffer([]byte(body))
@@ -34,11 +32,11 @@ func TestCreateDoctor(t *testing.T) {
 		t.Fail()
 
 	}
-	filter := bson.M{"name": "ABC", "mobileno": 123}
-	_, err = db.ConnectDB().Collection(utils.Doctors).DeleteOne(context.TODO(), filter)
-	if err != nil {
-		log.Printf("error occured in test case during deleting data. Erro = %s", err)
-	}
+	// filter := bson.M{"name": "ABC", "mobileno": 123}
+	// _, err = db.ConnectDB().Collection(utils.Doctors).DeleteOne(context.TODO(), filter)
+	// if err != nil {
+	// 	log.Printf("error occured in test case during deleting data. Erro = %s", err)
+	// }
 }
 
 func TestCreateDoctorNilBody(t *testing.T) {
