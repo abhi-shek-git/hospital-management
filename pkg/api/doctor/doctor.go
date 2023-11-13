@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CreateDoctor(w http.ResponseWriter, r *http.Request) {
+func DoctorDataAdded(w http.ResponseWriter, r *http.Request) {
 	var doc models.Doctor
 	err := json.NewDecoder(r.Body).Decode(&doc)
 	if err != nil {

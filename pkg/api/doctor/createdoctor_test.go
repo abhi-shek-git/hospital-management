@@ -28,7 +28,7 @@ func TestCreateDoctor(t *testing.T) {
 	response := httptest.NewRecorder()
 	// updating database variable from HMDB to HMDB_TEST
 	db.Database = utils.HMDB_TEST
-	CreateDoctor(response, request)
+	DoctorDataAdded(response, request)
 	if response.Code != http.StatusOK {
 		log.Println("status code does not match", response.Code)
 		t.Fail()
@@ -51,7 +51,7 @@ func TestCreateDoctorNilBody(t *testing.T) {
 		t.Fail()
 	}
 	response := httptest.NewRecorder()
-	CreateDoctor(response, request)
+	DoctorDataAdded(response, request)
 	if response.Code != http.StatusBadRequest {
 		log.Println("status code does not match", response.Code)
 		t.Fail()
@@ -74,7 +74,7 @@ func TestCreateDoctorWrongBody(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	CreateDoctor(response, request)
+	DoctorDataAdded(response, request)
 	if response.Code != http.StatusBadRequest {
 		log.Println("status code does not match", response.Code)
 		t.Fail()
@@ -96,7 +96,7 @@ func TestCreateDoctorWrongBody1(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	CreateDoctor(response, request)
+	DoctorDataAdded(response, request)
 	if response.Code != http.StatusBadRequest {
 		log.Println("status code does not match", response.Code)
 		t.Fail()
