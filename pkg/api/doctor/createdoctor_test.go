@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func Test_createDoctor(t *testing.T) {
+func TestCreateDoctor(t *testing.T) {
 	body := `{
 		"name" : "ABC",
 		"mobileno":123
@@ -41,7 +41,7 @@ func Test_createDoctor(t *testing.T) {
 	}
 }
 
-func Test_createDoctorNilBody(t *testing.T) {
+func TestCreateDoctorNilBody(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
 	db.Database = utils.HMDB_TEST
 	reqBody := bytes.NewBuffer(nil)
@@ -59,11 +59,11 @@ func Test_createDoctorNilBody(t *testing.T) {
 	}
 }
 
-func Test_createDoctorNegetive(t *testing.T) {
+func TestCreateDoctorWrongBody(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
 	db.Database = utils.HMDB_TEST
 	body := `{
-		"name" : "ABC",
+		"name" : "ABC"
 		}
 	`
 	reqBody := bytes.NewBuffer([]byte(body))
@@ -81,7 +81,7 @@ func Test_createDoctorNegetive(t *testing.T) {
 
 	}
 }
-func Test_createDoctorNegetive1(t *testing.T) {
+func TestCreateDoctorWrongBody1(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
 	db.Database = utils.HMDB_TEST
 	body := `{
