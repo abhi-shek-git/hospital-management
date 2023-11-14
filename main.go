@@ -17,7 +17,7 @@ func StartServer() {
 	// making router
 	router := mux.NewRouter()
 	// make handle func after writing the func
-	router.HandleFunc("/api/v1/doctor", doctor.CreateDoctor).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/doctor", doctor.DoctorDataAdded).Methods(http.MethodPost)
 	// making machine up and running on 8080
 	err := http.ListenAndServe(utils.PortNo, router)
 	log.Println(err)
