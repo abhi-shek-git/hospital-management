@@ -1,8 +1,8 @@
 package doctor
 
 import (
-	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -10,27 +10,30 @@ import (
 	"github.com/hospital-management/pkg/api/doctor/models"
 	"github.com/hospital-management/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func DoctorDataAdded(w http.ResponseWriter, r *http.Request) {
+func Create(w http.ResponseWriter, r *http.Request) {
 	var doc models.Doctor
+	//  decoding input and checking if input is not empty
 	err := json.NewDecoder(r.Body).Decode(&doc)
 	if err != nil {
 		log.Printf("error occured during decoding input body, error = %s", err)
 		w.WriteHeader(http.StatusBadRequest)
-		_, err = w.Write([]byte("invalid input"))
+		formatedErr := fmt.Errorf("invalid input")
+		_, err = w.Write([]byte(formatedErr.Error()))
 		if err != nil {
-			log.Printf("error occured during writing data to response in decoding input body. Error =  %s", err)
+			log.Printf("error occured during writing error data in response. Error =  %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		return
 	}
-	if doc.Name == "" {
-		log.Println("invalid input, name field is empty")
+	// checking input is valid or not
+	inputValidationResult := validateInput(doc)
+	if !inputValidationResult {
 		w.WriteHeader(http.StatusBadRequest)
-		_, err = w.Write([]byte("Name field should not be empty"))
+		formatedErr := fmt.Errorf("name or mobile number field can not be empty")
+		_, err = w.Write([]byte(formatedErr.Error()))
 		if err != nil {
 			log.Printf("error occured during writing data to response name field should not be empty. Error =  %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -38,25 +41,16 @@ func DoctorDataAdded(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if doc.MobileNo == 0 {
-		log.Println("invalid input, mobile no. field is empty")
-		w.WriteHeader(http.StatusBadRequest)
-		_, err = w.Write([]byte("mobile number field should not be empty"))
-		if err != nil {
-			log.Printf("error occured during writing data to response mobileno fiekd should not be empty. Error =  %s", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		return
-	}
-	collection := db.ConnectDB().Collection(utils.Doctors)
+
+	collection := db.ConnectDB().Collection(utils.DoctorCollection)
 	query := bson.M{"mobileno": doc.MobileNo}
-	dbFindResult := collection.FindOne(context.TODO(), query)
-	err = dbFindResult.Err()
-	if err == nil {
-		log.Printf("data already exists")
+
+	// finding data from database for validation
+	dbFindResult := db.FindDb(collection, query)
+	if dbFindResult == "data already exists" {
 		w.WriteHeader(http.StatusConflict)
-		_, err = w.Write([]byte("data already exists"))
+		formatedErr := fmt.Errorf("data already exists")
+		_, err = w.Write([]byte(formatedErr.Error()))
 		if err != nil {
 			log.Printf("error occured during writing data already exists to response . Error =  %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -64,24 +58,25 @@ func DoctorDataAdded(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if err != nil && err != mongo.ErrNoDocuments {
-		log.Printf("error occured during finding data from db, error = %s /n", err)
+	if dbFindResult == "internal error" {
 		w.WriteHeader(http.StatusInternalServerError)
-		_, err = w.Write([]byte("internal error"))
+		formatedErr := fmt.Errorf("internal error")
+		_, err = w.Write([]byte(formatedErr.Error()))
 		if err != nil {
 			log.Printf("error occured during writing data to response when error occured in findresult from db. Error =  %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		return
 	}
 
-	_, err = collection.InsertOne(context.TODO(), doc)
-	if err != nil {
-		log.Printf("error occured during inserting the data into db %s", err)
+	//  inserting data into database
+	dbInsertResult := db.InsertDb(collection, doc)
+	if dbInsertResult == "not inserted" {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	// sending stored data back to response
 	ResponseByte, err := json.Marshal(doc)
 	if err != nil {
 		log.Printf("error occured during marshalling the data for response. Error =  %s", err)
@@ -95,4 +90,17 @@ func DoctorDataAdded(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func validateInput(doc models.Doctor) bool {
+	if doc.MobileNo == 0 {
+		log.Printf("invalid input, mobile no. field is empty")
+		return false
+	}
+	if doc.Name == "" {
+		log.Printf("invalid input, name field is empty")
+		return false
+	}
+	return true
+
 }
