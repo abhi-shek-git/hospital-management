@@ -9,11 +9,11 @@ import (
 	"github.com/hospital-management/db"
 	"github.com/hospital-management/pkg/api/doctor/models"
 	"github.com/hospital-management/pkg/utils"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func Create(w http.ResponseWriter, r *http.Request) {
 	var doc models.Doctor
+
 	//  decoding input and checking if input is not empty
 	err := json.NewDecoder(r.Body).Decode(&doc)
 	if err != nil {
@@ -29,8 +29,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// checking input is valid or not
-	inputValidationResult := validateInput(doc)
-	if !inputValidationResult {
+	validatedInput := validateInput(doc)
+	if !validatedInput {
 		w.WriteHeader(http.StatusBadRequest)
 		formatedErr := fmt.Errorf("name or mobile number field can not be empty")
 		_, err = w.Write([]byte(formatedErr.Error()))
@@ -42,11 +42,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collection := db.ConnectDB().Collection(utils.DoctorCollection)
-	query := bson.M{"mobileno": doc.MobileNo}
+	collection := db.Connect().Collection(utils.DoctorCollection)
 
 	// finding data from database for validation
-	dbFindResult := db.FindDb(collection, query)
+	dbFindResult := db.FindOneByMobileNo(collection, doc.MobileNo)
 	if dbFindResult == "data already exists" {
 		w.WriteHeader(http.StatusConflict)
 		formatedErr := fmt.Errorf("data already exists")
@@ -70,8 +69,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//  inserting data into database
-	dbInsertResult := db.InsertDb(collection, doc)
+	dbInsertResult := db.InsertOne(collection, doc)
 	if dbInsertResult == "not inserted" {
+		log.Printf("data does not insert in database")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
