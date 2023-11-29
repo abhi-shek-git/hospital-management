@@ -18,9 +18,9 @@ func FindOneByMobileNo(collectionName *mongo.Collection, idMobileNo int) string 
 	}
 	if err != nil && err != mongo.ErrNoDocuments {
 		log.Printf("error occured during finding data from db, error = %s", err)
-		return "internal error"
+		return err.Error()
 	}
-	return "found"
+	return "not found"
 
 }
 
@@ -29,7 +29,7 @@ func InsertOne (collection *mongo.Collection, insertData interface{}) string {
 	_, err := collection.InsertOne(context.TODO(), insertData)
 	if err != nil {
 		log.Printf("error occured during inserting the data into db %s", err)
-		return "not inserted"
+		return err.Error()
 	}
 	return "inserted"
 }
