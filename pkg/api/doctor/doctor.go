@@ -8,6 +8,7 @@ import (
 	"github.com/hospital-management/db"
 	"github.com/hospital-management/pkg/api/doctor/models"
 	"github.com/hospital-management/pkg/utils"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -30,19 +31,20 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	collection := db.Connect().Collection(utils.DoctorCollection)
 
 	// finding data from database for validation
-	dbDoctor := db.FindOneByMobileNo(collection, doc.MobileNo)
-	if dbDoctor == "data already exists" {
-		http.Error(w, "data already exists", http.StatusConflict)
+	dbDoctorErr := db.FindOneByMobileNo(collection, doc.MobileNo)
+	if dbDoctorErr != nil && dbDoctorErr != mongo.ErrNoDocuments {
+		http.Error(w, dbDoctorErr.Error(), http.StatusInternalServerError)
 		return
 	}
-	if dbDoctor != "data already exists" && dbDoctor != "not found" {
-		http.Error(w, dbDoctor, http.StatusInternalServerError)
+	if dbDoctorErr == nil {
+		http.Error(w, "data already exists", http.StatusBadRequest)
+		return
 	}
 
 	//  inserting data into database
 	insertResult := db.InsertOne(collection, doc)
-	if insertResult != "inserted" {
-		http.Error(w, "data does not insert in database", http.StatusInternalServerError)
+	if insertResult != nil {
+		http.Error(w, insertResult.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -72,5 +74,4 @@ func validateInput(doc models.Doctor) bool {
 		return false
 	}
 	return true
-
 }
