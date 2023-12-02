@@ -33,12 +33,15 @@ func InsertOne(collection *mongo.Collection, insertData interface{}) error {
 	return nil
 }
 
-func FindAndDelete(collection *mongo.Collection, idMobileNo string) bool {
-	findResult := collection.FindOneAndDelete(context.TODO(), idMobileNo)
+func FindOneAndDelete(collection *mongo.Collection, idMobileNo int) error {
+	query := bson.M{"mobileno": idMobileNo}
+	findResult := collection.FindOneAndDelete(context.TODO(), query)
 	err := findResult.Err()
-	if findResult == nil || err == mongo.ErrNoDocuments {
-		log.Printf("no document found for deletion")
-		return false
+
+	if err != nil {
+		log.Printf("error occured during finding data from db. Error=%s", err)
+		return err
 	}
-	return true
+
+	return nil
 }
