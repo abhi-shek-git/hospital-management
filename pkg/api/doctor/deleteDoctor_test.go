@@ -5,16 +5,15 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/hospital-management/db"
 	"github.com/hospital-management/pkg/utils"
 )
 
 func TestDelete(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
-	db.Database = utils.HMDB_TEST
+	utils.Database = utils.HMDB_TEST
 
 	// making request
-	request, err := http.NewRequest(http.MethodDelete, "http://127.0.0.1:8080/api/v1/deleteDoctor/1234", nil)
+	request, err := http.NewRequest(http.MethodDelete, "http://127.0.0.1:8080/api/v1/deleteDoctor/9090", nil)
 	if err != nil {
 		log.Printf("error occured in test case during making request. Error =  %s", err)
 		t.Fail()
@@ -36,7 +35,7 @@ func TestDelete(t *testing.T) {
 }
 func TestDeleteWrongId(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
-	db.Database = utils.HMDB_TEST
+	utils.Database = utils.HMDB_TEST
 
 	// making request
 	request, err := http.NewRequest(http.MethodDelete, "http://127.0.0.1:8080/api/v1/deleteDoctor/abc", nil)
@@ -62,7 +61,7 @@ func TestDeleteWrongId(t *testing.T) {
 
 func TestDeleteNilId(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
-	db.Database = utils.HMDB_TEST
+	utils.Database = utils.HMDB_TEST
 
 	// making request
 	request, err := http.NewRequest(http.MethodDelete, "http://127.0.0.1:8080/api/v1/deleteDoctor", nil)

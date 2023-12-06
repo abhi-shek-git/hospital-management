@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hospital-management/db"
 	"github.com/hospital-management/pkg/utils"
 )
 
@@ -25,8 +24,8 @@ func TestCreateDoctor(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 	// updating database variable from HMDB to HMDB_TEST
-	db.Database = utils.HMDB_TEST
-	Create(response, request)
+	// utils.Database = utils.HMDB_TEST
+	Doc().Create(response, request)
 	if response.Code != http.StatusOK {
 		log.Printf("status code does not match. Needed =  %d  Got =  %d", http.StatusOK, response.Code)
 		t.Fail()
@@ -37,7 +36,7 @@ func TestCreateDoctor(t *testing.T) {
 
 func TestCreateDoctorNilBody(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
-	db.Database = utils.HMDB_TEST
+	utils.Database = utils.HMDB_TEST
 	reqBody := bytes.NewBuffer(nil)
 	request, err := http.NewRequest(http.MethodPost, "/api/v1/doctor", reqBody)
 	if err != nil {
@@ -45,7 +44,7 @@ func TestCreateDoctorNilBody(t *testing.T) {
 		t.Fail()
 	}
 	response := httptest.NewRecorder()
-	Create(response, request)
+	Doc().Create(response, request)
 	if response.Code != http.StatusBadRequest {
 		log.Printf("status code does not match. Needed =  %d  Got =  %d", http.StatusBadRequest, response.Code)
 		t.Fail()
@@ -55,7 +54,7 @@ func TestCreateDoctorNilBody(t *testing.T) {
 
 func TestCreateDoctorWrongBodyFieldMobileno(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
-	db.Database = utils.HMDB_TEST
+	utils.Database = utils.HMDB_TEST
 	body := `{
 		"name" : "ABC"
 		}
@@ -68,7 +67,7 @@ func TestCreateDoctorWrongBodyFieldMobileno(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	Create(response, request)
+	Doc().Create(response, request)
 	if response.Code != http.StatusBadRequest {
 		log.Printf("status code does not match. Needed =  %d  Got =  %d", http.StatusBadRequest, response.Code)
 		t.Fail()
@@ -77,7 +76,7 @@ func TestCreateDoctorWrongBodyFieldMobileno(t *testing.T) {
 }
 func TestCreateDoctorWrongBodyFieldName(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
-	db.Database = utils.HMDB_TEST
+	utils.Database = utils.HMDB_TEST
 	body := `{
 		"mobileno":123
 		}
@@ -90,7 +89,7 @@ func TestCreateDoctorWrongBodyFieldName(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	Create(response, request)
+	Doc().Create(response, request)
 	if response.Code != http.StatusBadRequest {
 		log.Printf("status code does not match. Needed =  %d  Got =  %d", http.StatusBadRequest, response.Code)
 		t.Fail()

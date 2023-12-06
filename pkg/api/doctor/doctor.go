@@ -13,7 +13,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Create(w http.ResponseWriter, r *http.Request) {
+type Doctor interface {
+	Create(w http.ResponseWriter, r *http.Request)
+	Delete(w http.ResponseWriter, r *http.Request)
+}
+
+type doc struct {
+	collection *mongo.Collection
+}
+
+func Doc() Doctor {
+	return &doc{collection: db.Connect().Collection(utils.DoctorCollection)}
+}
+
+func (d *doc) Create(w http.ResponseWriter, r *http.Request) {
 	var doc models.Doctor
 
 	//  decoding input and checking if input is not empty
@@ -23,6 +36,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid input", http.StatusBadRequest)
 		return
 	}
+
 	// checking input is valid or not
 	validate := validateInput(doc)
 	if !validate {
@@ -30,10 +44,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collection := db.Connect().Collection(utils.DoctorCollection)
-
 	// finding data from database for validation
-	dbDoctorErr := db.FindOneByMobileNo(collection, doc.MobileNo)
+	dbDoctorErr := db.FindOneByMobileNo(d.collection, doc.MobileNo)
 	if dbDoctorErr != nil && dbDoctorErr != mongo.ErrNoDocuments {
 		http.Error(w, dbDoctorErr.Error(), http.StatusInternalServerError)
 		return
@@ -44,7 +56,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//  inserting data into database
-	insertResult := db.InsertOne(collection, doc)
+	insertResult := db.InsertOne(d.collection, doc)
 	if insertResult != nil {
 		http.Error(w, insertResult.Error(), http.StatusInternalServerError)
 		return
@@ -77,7 +89,7 @@ func validateInput(doc models.Doctor) bool {
 	}
 	return true
 }
-func Delete(w http.ResponseWriter, r *http.Request) {
+func (d *doc) Delete(w http.ResponseWriter, r *http.Request) {
 	var2 := mux.Vars(r)
 
 	// validating input id
@@ -88,11 +100,9 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collection := db.Connect().Collection(utils.DoctorCollection)
-
 	// finding and deleting data from db
-
-	deleteErr := db.FindOneAndDelete(collection, id)
+	db.Connect()
+	deleteErr := db.FindOneAndDelete(d.collection, id)
 
 	if deleteErr == mongo.ErrNoDocuments {
 		log.Printf("no documents found. Error = %s", deleteErr)

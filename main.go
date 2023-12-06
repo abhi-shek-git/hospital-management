@@ -17,8 +17,8 @@ func StartServer() {
 	// making router
 	router := mux.NewRouter()
 	// make handle func after writing the func
-	router.HandleFunc("/api/v1/doctor", doctor.Create).Methods(http.MethodPost)
-	router.HandleFunc("/api/v1/deleteDoctor/{id}", doctor.Delete).Methods(http.MethodDelete)
+	router.HandleFunc("/api/v1/doctor", doctor.Doc().Create).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/deleteDoctor/{id}", doctor.Doc().Delete).Methods(http.MethodDelete)
 	// making machine up and running on 8080
 	err := http.ListenAndServe(utils.PortNo, router)
 	if err != nil {
