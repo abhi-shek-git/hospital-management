@@ -4,14 +4,29 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/hospital-management/db"
 	"github.com/hospital-management/pkg/api/doctor/models"
 	"github.com/hospital-management/pkg/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Create(w http.ResponseWriter, r *http.Request) {
+type Doctor interface {
+	Create(w http.ResponseWriter, r *http.Request)
+	Delete(w http.ResponseWriter, r *http.Request)
+}
+
+type doc struct {
+	collection *mongo.Collection
+}
+
+func Doc() Doctor {
+	return &doc{collection: db.Connect().Collection(utils.DoctorCollection)}
+}
+
+func (d *doc) Create(w http.ResponseWriter, r *http.Request) {
 	var doc models.Doctor
 
 	//  decoding input and checking if input is not empty
@@ -21,6 +36,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid input", http.StatusBadRequest)
 		return
 	}
+
 	// checking input is valid or not
 	validate := validateInput(doc)
 	if !validate {
@@ -28,10 +44,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collection := db.Connect().Collection(utils.DoctorCollection)
-
 	// finding data from database for validation
-	dbDoctorErr := db.FindOneByMobileNo(collection, doc.MobileNo)
+	dbDoctorErr := db.FindOneByMobileNo(d.collection, doc.MobileNo)
 	if dbDoctorErr != nil && dbDoctorErr != mongo.ErrNoDocuments {
 		http.Error(w, dbDoctorErr.Error(), http.StatusInternalServerError)
 		return
@@ -42,7 +56,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//  inserting data into database
-	insertResult := db.InsertOne(collection, doc)
+	insertResult := db.InsertOne(d.collection, doc)
 	if insertResult != nil {
 		http.Error(w, insertResult.Error(), http.StatusInternalServerError)
 		return
@@ -74,4 +88,58 @@ func validateInput(doc models.Doctor) bool {
 		return false
 	}
 	return true
+}
+func (d *doc) Delete(w http.ResponseWriter, r *http.Request) {
+	var2 := mux.Vars(r)
+
+	// validating input id
+	id, err := ValidateDeleteInput(var2)
+	if err != nil {
+		log.Printf("error occured during validating input id. Error = %s", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// finding and deleting data from db
+	db.Connect()
+	deleteErr := db.FindOneAndDelete(d.collection, id)
+
+	if deleteErr == mongo.ErrNoDocuments {
+		log.Printf("no documents found. Error = %s", deleteErr)
+		http.Error(w, deleteErr.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if deleteErr != nil {
+		log.Printf("error occured during finding data from db. Error = %s", deleteErr)
+		http.Error(w, deleteErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write([]byte("Record deleted"))
+	if err != nil {
+		log.Printf("error occured during writing data in response body. Error = %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func ValidateDeleteInput(inputId map[string]string) (int, error) {
+	id := ""
+
+	for key, value := range inputId {
+		if key == "id" {
+			id = value
+			break
+		}
+	}
+	if id == "" {
+		log.Printf("delete id is missing in input")
+		return 0, mongo.ErrNoDocuments
+	}
+	findId, err := strconv.Atoi(id)
+	if err != nil {
+		log.Printf("error occured during converting input string to integer. Error = %s", err)
+		return 0, err
+	}
+	return findId, nil
 }
