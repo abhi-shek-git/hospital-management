@@ -4,23 +4,30 @@ import (
 	"context"
 	"log"
 
+	"github.com/hospital-management/pkg/api/doctor/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func FindOneByMobileNo(collectionName *mongo.Collection, idMobileNo int) error {
+func FindOneByMobileNo(collectionName *mongo.Collection, idMobileNo int) (models.Doctor, error) {
+	var doc models.Doctor
 	query := bson.M{"mobileno": idMobileNo}
 	dbFindResult := collectionName.FindOne(context.TODO(), query)
 	err := dbFindResult.Err()
 	if err == mongo.ErrNoDocuments {
 		log.Printf("no document found in db")
-		return mongo.ErrNoDocuments
+		return doc, mongo.ErrNoDocuments
 	}
 	if err != nil && err != mongo.ErrNoDocuments {
 		log.Printf("error occured during finding data from db, error = %s", err)
-		return err
+		return doc, err
 	}
-	return nil
+	err = dbFindResult.Decode(&doc)
+	if err != nil {
+		log.Printf("error occured during decding the find result from db to models.doctor. Error = %s", err)
+		return doc, err
+	}
+	return doc, nil
 }
 
 func InsertOne(collection *mongo.Collection, insertData interface{}) error {
@@ -44,4 +51,20 @@ func FindOneAndDelete(collection *mongo.Collection, idMobileNo int) error {
 	}
 
 	return nil
+}
+
+func List(collection *mongo.Collection, idName string) (models.Doctor, error) {
+	var doc models.Doctor
+	query := bson.M{"name": idName}
+	findResult, err := collection.Find(context.TODO(), query)
+	if err != nil {
+		log.Printf("error occured during finding data from databade.")
+		return doc, err
+	}
+	err = findResult.Decode(&doc)
+	if err != nil {
+		log.Printf("error occured during decoding the find data of db. Error = %s", err)
+		return doc, err
+	}
+	return doc, nil
 }
