@@ -17,6 +17,8 @@ type Doctor interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
 	Fetch(w http.ResponseWriter, r *http.Request)
+	List(w http.ResponseWriter, r *http.Request)
+
 }
 
 type doc struct {
@@ -183,4 +185,38 @@ func (d *doc) Fetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func (d *doc) List(w http.ResponseWriter, r *http.Request) {
+	inpId := r.URL.Query().Get("name")
+
+	// checking if input query is not empty
+	if inpId == "" {
+		log.Printf("empty input query")
+		http.Error(w, "query field can not be empty", http.StatusBadRequest)
+		return
+	}
+
+	//fetching data from databas
+
+	doc, err := db.List(d.collection, inpId)
+	if err != nil {
+		log.Printf("error occured during fnding data from db. Error = %s", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	outByte, err := json.Marshal(doc)
+	if err != nil {
+		log.Printf("error occured in marshalling the find data. Error = %s", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// sending response
+	_, err = w.Write(outByte)
+	if err != nil {
+		log.Printf("error occured during sending data for output. Error = %s", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 }

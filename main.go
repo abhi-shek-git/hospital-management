@@ -22,6 +22,7 @@ func StartServer() {
 	router.HandleFunc("/api/v1/doctor", doc.Create).Methods(http.MethodPost)
 	router.HandleFunc("/api/v1/deleteDoctor/{id}", doc.Delete).Methods(http.MethodDelete)
 	router.HandleFunc("/api/v1/fetchDoctor/{id}", doc.Fetch).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/listDoctor", doc.List).Methods(http.MethodGet)
 	// making machine up and running on 8080
 	err := http.ListenAndServe(utils.PortNo, router)
 	if err != nil {
