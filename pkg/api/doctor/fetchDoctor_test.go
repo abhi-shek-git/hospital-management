@@ -8,7 +8,7 @@ import (
 	"github.com/hospital-management/pkg/utils"
 )
 
-func TestFetch(t *testing.T) {
+func TestFetchOk(t *testing.T) {
 	// updating database variable from HMDB to HMDB_TEST
 	utils.Database = utils.HMDB_TEST
 
@@ -52,7 +52,7 @@ func TestFetchNilId(t *testing.T) {
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusBadRequest {
+	if res.StatusCode != http.StatusNotFound {
 		log.Println("status code does not match", res.StatusCode)
 		t.Fail()
 
