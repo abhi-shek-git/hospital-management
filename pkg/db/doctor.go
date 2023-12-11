@@ -53,8 +53,9 @@ func FindOneAndDelete(collection *mongo.Collection, idMobileNo int) error {
 	return nil
 }
 
-func List(collection *mongo.Collection, idName string) ([]models.Doctor, error) {
-	var doc []models.Doctor
+func List(collection *mongo.Collection, idName string) (
+	models.Doctor, error) {
+	var doc models.Doctor
 	query := bson.M{"name": idName}
 	findResult, err := collection.Find(context.TODO(), query)
 	if err != nil {
@@ -69,7 +70,7 @@ func List(collection *mongo.Collection, idName string) ([]models.Doctor, error) 
 		}
 		err = findResult.Err()
 		if err != nil {
-			log.Printf("error occured durinf findresult error checking. Error = %s",err)
+			log.Printf("error occured durinf findresult error checking. Error = %s", err)
 			break
 		}
 	}
