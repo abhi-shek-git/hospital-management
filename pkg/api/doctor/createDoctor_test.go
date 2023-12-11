@@ -25,7 +25,7 @@ func TestCreateDoctor(t *testing.T) {
 	response := httptest.NewRecorder()
 	// updating database variable from HMDB to HMDB_TEST
 	// utils.Database = utils.HMDB_TEST
-	Doc().Create(response, request)
+	NewDoc().Create(response, request)
 	if response.Code != http.StatusOK {
 		log.Printf("status code does not match. Needed =  %d  Got =  %d", http.StatusOK, response.Code)
 		t.Fail()
@@ -44,7 +44,7 @@ func TestCreateDoctorNilBody(t *testing.T) {
 		t.Fail()
 	}
 	response := httptest.NewRecorder()
-	Doc().Create(response, request)
+	NewDoc().Create(response, request)
 	if response.Code != http.StatusBadRequest {
 		log.Printf("status code does not match. Needed =  %d  Got =  %d", http.StatusBadRequest, response.Code)
 		t.Fail()
@@ -67,7 +67,7 @@ func TestCreateDoctorWrongBodyFieldMobileno(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	Doc().Create(response, request)
+	NewDoc().Create(response, request)
 	if response.Code != http.StatusBadRequest {
 		log.Printf("status code does not match. Needed =  %d  Got =  %d", http.StatusBadRequest, response.Code)
 		t.Fail()
@@ -89,7 +89,7 @@ func TestCreateDoctorWrongBodyFieldName(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	Doc().Create(response, request)
+	NewDoc().Create(response, request)
 	if response.Code != http.StatusBadRequest {
 		log.Printf("status code does not match. Needed =  %d  Got =  %d", http.StatusBadRequest, response.Code)
 		t.Fail()
