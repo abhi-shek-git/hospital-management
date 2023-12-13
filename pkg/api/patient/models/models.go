@@ -5,5 +5,5 @@ type Patient struct {
 	HouseNo  int    `json:"House_No,omitempty"`
 	MobileNo int   
 	Email    string `json:"Email,omitempty"`
-	Patients string `json:"Patients,omitempty"`
+	Doctor string `json:"Patients,omitempty"`
 }
