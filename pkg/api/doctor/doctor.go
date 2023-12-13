@@ -18,7 +18,7 @@ type Doctor interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 	Fetch(w http.ResponseWriter, r *http.Request)
 	List(w http.ResponseWriter, r *http.Request)
-
+	// Update(w http.ResponseWriter, r *http.Request)
 }
 
 type doc struct {
@@ -78,7 +78,6 @@ func (d *doc) Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 func validateInput(doc models.Doctor) bool {
