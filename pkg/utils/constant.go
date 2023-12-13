@@ -5,6 +5,7 @@ const (
 	HMDB             = "hospital-mamagement"
 	HMDB_TEST        = "hospital-mamagement_TEST"
 	DoctorCollection = "doctors"
+	PatientCollection = "patients"
 )
 
 var Database = HMDB

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hospital-management/pkg/api/doctor"
+	"github.com/hospital-management/pkg/api/patient"
 	"github.com/hospital-management/pkg/utils"
 )
 
@@ -18,11 +19,14 @@ func StartServer() {
 	router := mux.NewRouter()
 
 	doc := doctor.NewDoc()
+	pat := patient.NewPat()
 	// make handle func after writing the func
 	router.HandleFunc("/api/v1/doctor", doc.Create).Methods(http.MethodPost)
 	router.HandleFunc("/api/v1/deleteDoctor/{id}", doc.Delete).Methods(http.MethodDelete)
 	router.HandleFunc("/api/v1/fetchDoctor/{id}", doc.Fetch).Methods(http.MethodGet)
 	router.HandleFunc("/api/v1/listDoctor", doc.List).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/updateDoctor", doc.Update).Methods(http.MethodPut)
+	router.HandleFunc("/api/v1/createPatient", pat.Create).Methods(http.MethodPut)
 	// making machine up and running on 8080
 	err := http.ListenAndServe(utils.PortNo, router)
 	if err != nil {
