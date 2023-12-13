@@ -15,7 +15,7 @@ func FindOneByMobileNo(collectionName *mongo.Collection, idMobileNo int) (models
 	dbFindResult := collectionName.FindOne(context.TODO(), query)
 	err := dbFindResult.Err()
 	if err == mongo.ErrNoDocuments {
-		log.Printf("no document found in db")
+		log.Printf("no document found in db", err)
 		return doc, mongo.ErrNoDocuments
 	}
 	if err != nil && err != mongo.ErrNoDocuments {
@@ -78,4 +78,23 @@ func List(collection *mongo.Collection, idName string) (
 	return doc, nil
 }
 
+func UpdateOne(collection *mongo.Collection, idMobileNo int, updateData models.Doctor) (models.Doctor, error) {
+	var inputDoc models.Doctor
+	query := bson.M{"mobileno": idMobileNo}
+	updateDoc := bson.M{
+		"$set": inputDoc,
+	}
+	_, err := collection.UpdateOne(context.TODO(), query, updateDoc)
+	if err != nil {
+		log.Printf("error occured during performing update operation in db. Error = %s", err)
+		return inputDoc, err
+	}
 
+	// finding updated data
+	updatedFind, err := FindOneByMobileNo(collection, idMobileNo)
+	if err != nil {
+		log.Printf("error occured in update func in db using findByMobileNo func execution. Error = %s", err)
+		return inputDoc, err
+	}
+	return updatedFind, nil
+}
