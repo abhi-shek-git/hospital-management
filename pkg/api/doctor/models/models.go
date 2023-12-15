@@ -1,9 +1,11 @@
 package models
 
 type Doctor struct {
-	Name     string `json:"Name,omitempty"`
-	HouseNo  int    `json:"House_No,omitempty"`
-	MobileNo int   
-	Email    string `json:"Email,omitempty"`
-	Patients string `json:"Patients,omitempty"`
+	Name       string `json:"Name,omitempty" bson:"name,omitempty"`
+	Gender     string `json:"Gender,omitempty" bson:"gender,omitempty"`
+	Department string `json:"Department,omitempty" bson:"department,omitempty"`
+	HouseNo    int    `json:"HouseNo,omitempty" bson:"houseno,omitempty"`
+	MobileNo   int
+	Email      string `json:"Email,omitempty" bson:"email,omitempty"`
+	Patients   string `json:"Patients,omitempty" bson:"patients,omitempty"`
 }

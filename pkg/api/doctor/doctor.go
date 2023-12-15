@@ -89,39 +89,15 @@ func validateInput(doc models.Doctor) bool {
 		log.Printf("invalid input, name field is empty")
 		return false
 	}
+	if doc.Gender == "" {
+		log.Printf("invalid input, gender field can not be empty")
+		return false
+	}
+	if doc.Department == "" {
+		log.Printf("invalid input, department field can not be empty")
+		return false
+	}
 	return true
-}
-func (d *doc) Delete(w http.ResponseWriter, r *http.Request) {
-	var2 := mux.Vars(r)
-
-	// validating input id
-	id, err := ValidateInputId(var2)
-	if err != nil {
-		log.Printf("error occured during validating input id. Error = %s", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// finding and deleting data from db
-	deleteErr := db.FindOneAndDelete(d.collection, id)
-
-	if deleteErr == mongo.ErrNoDocuments {
-		log.Printf("no documents found. Error = %s", deleteErr)
-		http.Error(w, deleteErr.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if deleteErr != nil {
-		log.Printf("error occured during finding data from db. Error = %s", deleteErr)
-		http.Error(w, deleteErr.Error(), http.StatusInternalServerError)
-		return
-	}
-	_, err = w.Write([]byte("Record deleted"))
-	if err != nil {
-		log.Printf("error occured during writing data in response body. Error = %s", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 }
 
 func ValidateInputId(inputId map[string]string) (int, error) {
@@ -260,4 +236,36 @@ func (d *doc) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+func (d *doc) Delete(w http.ResponseWriter, r *http.Request) {
+	var2 := mux.Vars(r)
+
+	// validating input id
+	id, err := ValidateInputId(var2)
+	if err != nil {
+		log.Printf("error occured during validating input id. Error = %s", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// finding and deleting data from db
+	deleteErr := db.FindOneAndDelete(d.collection, id)
+
+	if deleteErr == mongo.ErrNoDocuments {
+		log.Printf("no documents found. Error = %s", deleteErr)
+		http.Error(w, deleteErr.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if deleteErr != nil {
+		log.Printf("error occured during finding data from db. Error = %s", deleteErr)
+		http.Error(w, deleteErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write([]byte("Record deleted"))
+	if err != nil {
+		log.Printf("error occured during writing data in response body. Error = %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
