@@ -18,7 +18,7 @@ type Patient interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 	Fetch(w http.ResponseWriter, r *http.Request)
 	List(w http.ResponseWriter, r *http.Request)
-
+	Update(w http.ResponseWriter, r *http.Request)
 }
 
 type pat struct {
@@ -222,3 +222,44 @@ func (p *pat) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (p *pat) Update(w http.ResponseWriter, r *http.Request) {
+	var pat models.Patient
+
+	//  decoding input and checking if input is not empty
+	err := json.NewDecoder(r.Body).Decode(&pat)
+	if err != nil {
+		log.Printf("error occured during decoding input body, error = %s", err)
+		http.Error(w, "invalid input", http.StatusBadRequest)
+		return
+	}
+	log.Println("??????????", pat.MobileNo)
+	// validating input data
+	if pat.MobileNo == 0 {
+		log.Printf("mobile No field can not be empty.")
+		http.Error(w, "mobile No field can not be empty.", http.StatusBadRequest)
+		return
+	}
+
+	// fetching data from db
+	updatedDoc, err := db.UpdateOnePatient(p.collection, pat.MobileNo, pat)
+	if err != nil {
+		log.Printf("error occured during updating data. Error = %s", err)
+		http.Error(w, "internal server error.", http.StatusInternalServerError)
+		return
+	}
+
+	// sending response
+	ResponseByte, err := json.Marshal(updatedDoc)
+	if err != nil {
+		log.Printf("error occured during marshalling the data for response. Error =  %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(ResponseByte)
+	if err != nil {
+		log.Printf("error occured during writing response for sending data back. Error =  %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+}
