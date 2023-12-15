@@ -15,7 +15,7 @@ func FindOneByMobileNo(collectionName *mongo.Collection, idMobileNo int) (models
 	dbFindResult := collectionName.FindOne(context.TODO(), query)
 	err := dbFindResult.Err()
 	if err == mongo.ErrNoDocuments {
-		log.Printf("no document found in db", err)
+		log.Printf("no document found in db. Error = %s", err)
 		return doc, mongo.ErrNoDocuments
 	}
 	if err != nil && err != mongo.ErrNoDocuments {
@@ -79,22 +79,45 @@ func List(collection *mongo.Collection, idName string) (
 }
 
 func UpdateOne(collection *mongo.Collection, idMobileNo int, updateData models.Doctor) (models.Doctor, error) {
-	var inputDoc models.Doctor
 	query := bson.M{"mobileno": idMobileNo}
+	var inpDoc models.Doctor
+
+	if updateData.Email != "" {
+		inpDoc.Email = updateData.Email
+	}
+	if updateData.HouseNo != 0 {
+		inpDoc.HouseNo = updateData.HouseNo
+	}
+	if updateData.MobileNo != 0 {
+		inpDoc.MobileNo = updateData.MobileNo
+	}
+	if updateData.Name != "" {
+		inpDoc.Name = updateData.Name
+	}
+	if updateData.Patients != "" {
+		inpDoc.Patients = updateData.Patients
+	}
+	if updateData.Gender != "" {
+		inpDoc.Gender = updateData.Gender
+	}
+	if updateData.Department != "" {
+		inpDoc.Department = updateData.Department
+	}
+
 	updateDoc := bson.M{
-		"$set": inputDoc,
+		"$set": inpDoc,
 	}
 	_, err := collection.UpdateOne(context.TODO(), query, updateDoc)
 	if err != nil {
 		log.Printf("error occured during performing update operation in db. Error = %s", err)
-		return inputDoc, err
+		return updateData, err
 	}
 
 	// finding updated data
 	updatedFind, err := FindOneByMobileNo(collection, idMobileNo)
 	if err != nil {
 		log.Printf("error occured in update func in db using findByMobileNo func execution. Error = %s", err)
-		return inputDoc, err
+		return updateData, err
 	}
 	return updatedFind, nil
 }

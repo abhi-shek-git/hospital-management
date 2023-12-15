@@ -16,6 +16,7 @@ import (
 type Patient interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
+	Fetch(w http.ResponseWriter, r *http.Request)
 
 }
 
@@ -27,7 +28,7 @@ func NewPat() Patient {
 	return &pat{collection: db.Connect().Collection(utils.PatientCollection)}
 }
 
-func (d *pat) Create(w http.ResponseWriter, r *http.Request) {
+func (p *pat) Create(w http.ResponseWriter, r *http.Request) {
 	var pat models.Patient
 
 	//  decoding input and checking if input is not empty
@@ -46,7 +47,7 @@ func (d *pat) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// finding data from database for validation
-	_, dbPatientErr := db.FindOneByMobileNo(d.collection, pat.MobileNo)
+	_, dbPatientErr := db.FindOneByMobileNo(p.collection, pat.MobileNo)
 	if dbPatientErr != nil && dbPatientErr != mongo.ErrNoDocuments {
 		http.Error(w, dbPatientErr.Error(), http.StatusInternalServerError)
 		return
@@ -57,7 +58,7 @@ func (d *pat) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//  inserting data into database
-	insertResult := db.InsertOne(d.collection, pat)
+	insertResult := db.InsertOne(p.collection, pat)
 	if insertResult != nil {
 		http.Error(w, insertResult.Error(), http.StatusInternalServerError)
 		return
@@ -90,7 +91,7 @@ func validateInput(pat models.Patient) bool {
 	return true
 }
 
-func (d *pat) Delete(w http.ResponseWriter, r *http.Request) {
+func (p *pat) Delete(w http.ResponseWriter, r *http.Request) {
 	var2 := mux.Vars(r)
 
 	// validating input id
@@ -102,7 +103,7 @@ func (d *pat) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// finding and deleting data from db
-	deleteErr := db.FindOneAndDelete(d.collection, id)
+	deleteErr := db.FindOneAndDelete(p.collection, id)
 
 	if deleteErr == mongo.ErrNoDocuments {
 		log.Printf("no documents found. Error = %s", deleteErr)
@@ -143,3 +144,46 @@ func ValidateInputId(inputId map[string]string) (int, error) {
 	}
 	return findId, nil
 }
+
+
+func (p *pat) Fetch(w http.ResponseWriter, r *http.Request) {
+	inputId := mux.Vars(r)
+
+	// validating input data
+	id, err := ValidateInputId(inputId)
+	if err != nil {
+		log.Printf("input id should not be empty. Error = %s", err)
+		http.Error(w, "invalid input id", http.StatusBadRequest)
+		return
+	}
+
+	// fetching data from db
+	doc, err := db.FindOneByMobileNo(p.collection, id)
+	if err == mongo.ErrNoDocuments {
+		log.Printf("no documents found. Error = %s", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		log.Printf("error occured during finding data from db. Error = %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// sending response
+	ResponseByte, err := json.Marshal(doc)
+	if err != nil {
+		log.Printf("error occured during marshalling the data for response. Error =  %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(ResponseByte)
+	if err != nil {
+		log.Printf("error occured during writing response for sending data back. Error =  %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+}
+

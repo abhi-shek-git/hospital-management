@@ -13,7 +13,9 @@ import (
 func TestCreateDoctor(t *testing.T) {
 	body := `{
 		"name" : "ABCDE",
-		"mobileno":909000
+		"mobileno":9,
+		"gender" : "male",
+		"department":"cardiology"
 		}
 	`
 	reqBody := bytes.NewBuffer([]byte(body))
