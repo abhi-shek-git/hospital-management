@@ -5,8 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/hospital-management/pkg/api/doctor"
 	"github.com/hospital-management/pkg/api/department"
+	"github.com/hospital-management/pkg/api/doctor"
+	"github.com/hospital-management/pkg/api/employee"
 	"github.com/hospital-management/pkg/api/patient"
 	"github.com/hospital-management/pkg/user"
 	"github.com/hospital-management/pkg/utils"
@@ -24,6 +25,7 @@ func StartServer() {
 	pat := patient.NewPat()
 	user := user.NewUser()
 	dept := department.NewDept()
+	employ := employee.NewEmployee()
 	// make handle func after writing the func
 
 	// doctor functions
@@ -46,6 +48,9 @@ func StartServer() {
 
 	// department function
 	router.HandleFunc("/api/v1/createDept", dept.Create).Methods(http.MethodPost)
+
+	// employee functions
+	router.HandleFunc("/api/v1/createEmployee", employ.Create).Methods(http.MethodPost)
 
 	// making machine up and running on 8080
 	err := http.ListenAndServe(utils.PortNo, router)
