@@ -31,9 +31,20 @@ type Patient struct {
 }
 
 type Department struct {
-	Id      string `bson: "_id"`
+	Id      string `bson: "id"`
 	Name    string `json:"Name,omitempty" bson:"name,omitempty"`
 	Doctor  Doctor
 	Patient Patient
 	User    User
+}
+
+type Employee struct {
+	Department  string
+	PostName    string
+	Designation string
+	Name        string
+	Gender      string
+	Address     string
+	MobileNo    int
+	Email       string
 }
