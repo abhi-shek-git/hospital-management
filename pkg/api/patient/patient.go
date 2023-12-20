@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hospital-management/pkg/api/patient/models"
+	"github.com/hospital-management/pkg/api/models"
 	"github.com/hospital-management/pkg/db"
 	"github.com/hospital-management/pkg/utils"
 	"go.mongodb.org/mongo-driver/mongo"
