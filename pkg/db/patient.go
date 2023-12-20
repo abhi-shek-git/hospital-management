@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/hospital-management/pkg/api/patient/models"
+	"github.com/hospital-management/pkg/api/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
