@@ -44,7 +44,7 @@ type Employee struct {
 	Designation string
 	Name        string
 	Gender      string
-	Address     string
+	HouseNo     int
 	MobileNo    int
 	Email       string
 }

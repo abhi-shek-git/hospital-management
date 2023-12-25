@@ -53,6 +53,8 @@ func StartServer() {
 	// employee functions
 	router.HandleFunc("/api/v1/createEmployee", employ.Create).Methods(http.MethodPost)
 	router.HandleFunc("/api/v1/fetchEmployee", employ.Fetch).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/listEmployee", employ.List).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/updateEmployee", employ.Update).Methods(http.MethodPut)
 
 	// making machine up and running on 8080
 	err := http.ListenAndServe(utils.PortNo, router)

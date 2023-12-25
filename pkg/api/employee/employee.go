@@ -16,6 +16,8 @@ import (
 type Employee interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	Fetch(w http.ResponseWriter, r *http.Request)
+	List(w http.ResponseWriter, r *http.Request)
+	Update(w http.ResponseWriter, r *http.Request)
 
 }
 
@@ -160,6 +162,82 @@ func (e *employee) Fetch(w http.ResponseWriter, r *http.Request) {
 
 	// sending response
 	ResponseByte, err := json.Marshal(empl)
+	if err != nil {
+		log.Printf("error occured during marshalling the data for response. Error =  %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(ResponseByte)
+	if err != nil {
+		log.Printf("error occured during writing response for sending data back. Error =  %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func (e *employee) List(w http.ResponseWriter, r *http.Request) {
+	inpId := r.URL.Query().Get("name")
+
+	// checking if input query is not empty
+	if inpId == "" {
+		log.Printf("empty input query")
+		http.Error(w, "query field can not be empty", http.StatusBadRequest)
+		return
+	}
+
+	//fetching data from databas
+
+	emp, err := db.ListEmployee(e.collection, inpId)
+	if err != nil {
+		log.Printf("error occured during fnding data from db. Error = %s", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	outByte, err := json.Marshal(emp)
+	if err != nil {
+		log.Printf("error occured in marshalling the find data. Error = %s", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// sending response
+	_, err = w.Write(outByte)
+	if err != nil {
+		log.Printf("error occured during sending data for output. Error = %s", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (e *employee) Update(w http.ResponseWriter, r *http.Request) {
+	var employ models.Employee
+
+	//  decoding input and checking if input is not empty
+	err := json.NewDecoder(r.Body).Decode(&employ)
+	if err != nil {
+		log.Printf("error occured during decoding input body, error = %s", err)
+		http.Error(w, "invalid input", http.StatusBadRequest)
+		return
+	}
+	log.Println("??????????", employ.MobileNo)
+	// validating input data
+	if employ.MobileNo == 0 {
+		log.Printf("mobile No field can not be empty.")
+		http.Error(w, "mobile No field can not be empty.", http.StatusBadRequest)
+		return
+	}
+
+	// fetching data from db
+	updatedEmp, err := db.UpdateOneEmployee(e.collection, employ.MobileNo, employ)
+	if err != nil {
+		log.Printf("error occured during updating data. Error = %s", err)
+		http.Error(w, "internal server error.", http.StatusInternalServerError)
+		return
+	}
+
+	// sending response
+	ResponseByte, err := json.Marshal(updatedEmp)
 	if err != nil {
 		log.Printf("error occured during marshalling the data for response. Error =  %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
