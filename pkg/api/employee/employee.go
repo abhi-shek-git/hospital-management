@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/hospital-management/pkg/api/models"
 	"github.com/hospital-management/pkg/db"
 	"github.com/hospital-management/pkg/utils"
@@ -13,6 +15,8 @@ import (
 
 type Employee interface {
 	Create(w http.ResponseWriter, r *http.Request)
+	Fetch(w http.ResponseWriter, r *http.Request)
+
 }
 
 type employee struct {
@@ -20,6 +24,7 @@ type employee struct {
 }
 
 func NewEmployee() Employee {
+
 	return &employee{collection: db.Connect().Collection(utils.EmployeeCollection)}
 }
 
@@ -33,6 +38,7 @@ func (e *employee) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid input", http.StatusBadRequest)
 		return
 	}
+
 	// checking input is valid or not
 	validate := validateInput(employ)
 	if !validate {
@@ -105,4 +111,65 @@ func validateInput(employ models.Employee) bool {
 	}
 
 	return true
+}
+func ValidateInputId(inputId map[string]string) (int, error) {
+	id := ""
+
+	for key, value := range inputId {
+		if key == "id" {
+			id = value
+			break
+		}
+	}
+	if id == "" {
+		log.Printf("delete id is missing in input")
+		return 0, mongo.ErrNoDocuments
+	}
+	findId, err := strconv.Atoi(id)
+	if err != nil {
+		log.Printf("error occured during converting input string to integer. Error = %s", err)
+		return 0, err
+	}
+	return findId, nil
+}
+
+func (e *employee) Fetch(w http.ResponseWriter, r *http.Request) {
+	inputId := mux.Vars(r)
+
+	// validating input data
+	id, err := ValidateInputId(inputId)
+	if err != nil {
+		log.Printf("input id should not be empty. Error = %s", err)
+		http.Error(w, "invalid input id", http.StatusBadRequest)
+		return
+	}
+
+	// fetching data from db
+	empl, err := db.FindOneByMobile(e.collection, id)
+	if err == mongo.ErrNoDocuments {
+		log.Printf("no documents found. Error = %s", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		log.Printf("error occured during finding data from db. Error = %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// sending response
+	ResponseByte, err := json.Marshal(empl)
+	if err != nil {
+		log.Printf("error occured during marshalling the data for response. Error =  %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(ResponseByte)
+	if err != nil {
+		log.Printf("error occured during writing response for sending data back. Error =  %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 }

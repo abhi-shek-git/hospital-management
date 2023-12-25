@@ -13,7 +13,7 @@ func TestFetchOk(t *testing.T) {
 	utils.Database = utils.HMDB_TEST
 
 	// making request
-	request, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:8080/api/v1/fetchDoctor/909000", nil)
+	request, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:8080/api/v1/fetchDoctor/909", nil)
 	if err != nil {
 		log.Printf("error occured in test case during making request. Error =  %s", err)
 		t.Fail()

@@ -26,6 +26,7 @@ func StartServer() {
 	user := user.NewUser()
 	dept := department.NewDept()
 	employ := employee.NewEmployee()
+
 	// make handle func after writing the func
 
 	// doctor functions
@@ -51,6 +52,7 @@ func StartServer() {
 
 	// employee functions
 	router.HandleFunc("/api/v1/createEmployee", employ.Create).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/fetchEmployee", employ.Fetch).Methods(http.MethodGet)
 
 	// making machine up and running on 8080
 	err := http.ListenAndServe(utils.PortNo, router)

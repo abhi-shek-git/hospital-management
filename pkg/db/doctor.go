@@ -31,7 +31,7 @@ func FindOneByMobileNo(collectionName *mongo.Collection, idMobileNo int) (models
 }
 
 func InsertOne(collection *mongo.Collection, insertData interface{}) error {
-
+	
 	_, err := collection.InsertOne(context.TODO(), insertData)
 	if err != nil {
 		log.Printf("error occured during inserting the data into db %s", err)
