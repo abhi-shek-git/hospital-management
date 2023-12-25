@@ -31,7 +31,7 @@ type Patient struct {
 }
 
 type Department struct {
-	Id      string `bson: "id"`
+	Id      string `bson: "_id"`
 	Name    string `json:"Name,omitempty" bson:"name,omitempty"`
 	Doctor  Doctor
 	Patient Patient
